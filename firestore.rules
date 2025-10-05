@@ -1,0 +1,30 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Allow read/write access to mood comments for authenticated users
+    match /moodComments/{mood}/comments/{commentId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // Allow read access to all mood comments (for public viewing)
+    match /moodComments/{mood}/comments/{commentId} {
+      allow read: if true;
+    }
+    
+    // Allow authenticated users to manage their saved items
+    match /users/{userId}/savedItems/{itemId} {
+      allow read, write, create, update, delete: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Allow authenticated users to list their saved items collection
+    match /users/{userId}/savedItems {
+      allow read, list: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Allow authenticated users to create their user document if it doesn't exist
+    match /users/{userId} {
+      allow read, write, create: if request.auth != null && request.auth.uid == userId;
+    }
+  }
+}
+
